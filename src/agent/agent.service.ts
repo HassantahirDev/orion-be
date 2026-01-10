@@ -97,11 +97,11 @@ export class AgentService {
 
       // Store memory only if requested (skip when called from WebSocket)
       if (storeMemory) {
-        await this.memoryService.addMemory(sessionId, {
-          type: 'CONTEXT',
-          content: `User request: ${input}`,
-          metadata: { planId: plan.steps.length },
-        });
+      await this.memoryService.addMemory(sessionId, {
+        type: 'CONTEXT',
+        content: `User request: ${input}`,
+        metadata: { planId: plan.steps.length },
+      });
       }
 
       return plan;

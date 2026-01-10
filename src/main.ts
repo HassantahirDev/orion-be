@@ -17,7 +17,7 @@ async function bootstrap() {
   // Security
   app.use(helmet());
   app.enableCors({
-    origin: configService.get('FRONTEND_URL') || 'http://localhost:3001',
+    origin: 'https://orion-alpha.vercel.app',
     credentials: true,
   });
 
