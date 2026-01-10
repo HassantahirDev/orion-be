@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  apiKeys   ApiKey[]
+  sessions  Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SYSTEM
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  name        String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("api_keys")
+}
+
+model Session {
+  id           String         @id @default(uuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       SessionStatus  @default(ACTIVE)
+  metadata     Json?
+  memories     Memory[]
+  toolExecutions ToolExecution[]
+  events       SessionEvent[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  endedAt      DateTime?
+
+  @@map("sessions")
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+  ERROR
+}
+
+model Memory {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  content     String
+  type        MemoryType @default(CONTEXT)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("memories")
+}
+
+enum MemoryType {
+  CONTEXT
+  SUMMARY
+  FACT
+  TOOL_RESULT
+}
+
+model ToolExecution {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  toolName    String
+  input       Json
+  output      Json?
+  status      ExecutionStatus @default(PENDING)
+  error       String?
+  duration    Int? // milliseconds
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@map("tool_executions")
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Tool {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  schema      Json // OpenAPI-style schema for the tool
+  isActive    Boolean  @default(true)
+  rateLimit   Int?     // requests per minute
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tools")
+}
+
+model SessionEvent {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type        EventType
+  data        Json
+  createdAt   DateTime @default(now())
+
+  @@map("session_events")
+}
+
+enum EventType {
+  AUDIO_INPUT
+  AUDIO_OUTPUT
+  AGENT_PLAN
+  TOOL_CALL
+  ERROR
+  STATUS_CHANGE
+}
+
+model GuardrailLog {
+  id          String   @id @default(uuid())
+  sessionId   String?
+  rule        String
+  action      GuardrailAction
+  input       String?
+  reason      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("guardrail_logs")
+}
+
+enum GuardrailAction {
+  ALLOW
+  BLOCK
+  FILTER
+  MASK
+}
