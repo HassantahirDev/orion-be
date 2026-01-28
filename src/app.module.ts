@@ -14,6 +14,7 @@ import { WebsocketModule } from './websocket/websocket.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { VoiceModule } from './voice/voice.module';
 import { EmailModule } from './email/email.module';
+import { SpotifyPredictorModule } from './spotify-predictor/spotify-predictor.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EmailModule } from './email/email.module';
     WebsocketModule,
     VoiceModule,
     EmailModule,
+    SpotifyPredictorModule,
   ],
   providers: [
     {
