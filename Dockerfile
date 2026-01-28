@@ -43,6 +43,8 @@ COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --chown=nestjs:nodejs ./prisma ./prisma
+# Copy model files (trained model and scaler) from builder stage
+COPY --from=builder --chown=nestjs:nodejs /app/model ./model
 
 # Switch to non-root user
 USER nestjs

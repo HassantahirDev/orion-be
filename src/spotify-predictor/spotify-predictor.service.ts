@@ -32,9 +32,19 @@ export class SpotifyPredictorService {
       const modelFile = join(this.modelPath, 'model.json');
       const scalerFile = join(this.modelPath, 'scaler.json');
 
+      this.logger.log(`Looking for model files in: ${this.modelPath}`);
+      this.logger.log(`Model file path: ${modelFile}`);
+      this.logger.log(`Scaler file path: ${scalerFile}`);
+
       if (!fs.existsSync(modelFile) || !fs.existsSync(scalerFile)) {
         this.logger.warn(
-          'Model files not found. Please train the model using the Jupyter notebook first.',
+          `Model files not found. Model file exists: ${fs.existsSync(modelFile)}, Scaler file exists: ${fs.existsSync(scalerFile)}`,
+        );
+        this.logger.warn(
+          `Current working directory: ${process.cwd()}`,
+        );
+        this.logger.warn(
+          'Please ensure model.json and scaler.json are in the model/ directory.',
         );
         return;
       }
@@ -46,6 +56,7 @@ export class SpotifyPredictorService {
       this.scalerData = JSON.parse(scalerJson) as ScalerData;
 
       this.logger.log('Model and scaler loaded successfully');
+      this.logger.log(`Model features: ${this.modelData.feature_order.join(', ')}`);
     } catch (error) {
       this.logger.error(`Error loading model: ${error.message}`, error.stack);
     }
